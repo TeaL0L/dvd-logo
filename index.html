@@ -451,6 +451,7 @@ function predictBouncesToCorner(x, y, dx, dy, width, height, logoWidth, logoHeig
     const maxX = width - logoWidth;
     const maxY = height - logoHeight;
     const PRECISION = 0.0001;
+    const CORNER_THRESHOLD = 1;
 
     let currentX = x;
     let currentY = y;
@@ -492,9 +493,15 @@ function predictBouncesToCorner(x, y, dx, dy, width, height, logoWidth, logoHeig
         bounces++;
     }
 
-    return "∞";
+    return MAX_ITERATIONS;
 }
 
+// Update the bounce counter display
+function updateBounceCounter(bouncesLeft) {
+    bounceCountDisplay.textContent = bouncesLeft;
+}
+
+// Modify the animate function's prediction part
 function animate() {
     const maxX = window.innerWidth - logo.offsetWidth;
     const maxY = window.innerHeight - logo.offsetHeight;
@@ -533,16 +540,18 @@ function animate() {
     lastPositionWasCorner = currentlyInCorner;
 
     if (isCornerPredictionEnabled) {
-        const bouncesLeft = predictBouncesToCorner(
-            x, y, 
-            xSpeed,
-            ySpeed,
-            window.innerWidth, 
-            window.innerHeight, 
-            logo.offsetWidth, 
-            logo.offsetHeight
-        );
-        bounceCountDisplay.textContent = bouncesLeft;
+        setTimeout(() => {
+            const bouncesLeft = predictBouncesToCorner(
+                x, y, 
+                xSpeed,
+                ySpeed,
+                window.innerWidth, 
+                window.innerHeight, 
+                logo.offsetWidth, 
+                logo.offsetHeight
+            );
+            updateBounceCounter(bouncesLeft);
+        }, 0);
     }
     
     requestAnimationFrame(animate);
