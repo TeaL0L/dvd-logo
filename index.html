@@ -51,7 +51,7 @@ body::before {
     20% { color: #00ff00; filter: drop-shadow(0 0 10px #00ff00); }
     40% { color: #0000ff; filter: drop-shadow(0 0 10px #0000ff); }
     60% { color: #ffff00; filter: drop-shadow(0 0 10px #ffff00); }
-    80% { color: #ff00ff; filter: drop-shadow(0 0 10px #ff00ff); }
+    80% { color: #ff00ff; filter: drop-shadow(0 0 10px #ffff00); }
     100% { color: #ff0000; filter: drop-shadow(0 0 10px #ff0000); }
 }
 
@@ -204,13 +204,26 @@ input:checked + .slider:before {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
+#total-bounces {
+    position: fixed; 
+    top: 80px; 
+    right: 20px; 
+    color: white; 
+    font-family: Arial, sans-serif; 
+    font-size: 24px; 
+    z-index: 1000; 
+    background: rgba(0, 0, 0, 0.8); 
+    backdrop-filter: blur(10px); 
+    padding: 10px 20px; 
+    border-radius: 15px; 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); 
+    transition: all 0.3s ease;
+}
 </style>
 </head>
 <body>
-
-<audio id="yippy" preload="auto">
-    <source src="yippee.mp3" type="audio/mpeg">
-</audio>
 
 <div class="toggle-container">
     <div style="display: flex; align-items: center; gap: 10px;">
@@ -231,6 +244,10 @@ input:checked + .slider:before {
     Corner Hits: <span id="hits-count">0</span>
 </div>
 
+<div id="total-bounces">
+    Total Bounces: <span id="bounces-count">0</span>
+</div>
+
 <div class="dvd-logo">
     <svg id="logo" viewBox="0 0 210 107" xmlns="http://www.w3.org/2000/svg">
         <path d="M118.895,20.346c0,0-13.743,16.922-13.04,18.001c0.975-1.079-4.934-18.186-4.934-18.186s-1.233-3.597-5.102-15.387H81.81H47.812H22.175l-2.56,11.068h19.299h4.579c12.415,0,19.995,5.132,17.878,14.225c-2.287,9.901-13.123,14.128-24.665,14.128H32.39l5.552-24.208H18.647l-8.192,35.368h27.398c20.612,0,40.166-11.067,43.692-25.288c0.617-2.614,0.53-9.185-1.054-13.053c0-0.093-0.091-0.271-0.178-0.537c-0.087-0.093-0.178-0.722,0.178-0.814c0.172-0.092,0.525,0.271,0.525,0.358c0,0,0.179,0.456,0.351,0.813l17.44,50.315l44.404-51.216l18.143-0.092h4.052c12.416,0,20.09,5.132,17.969,14.225c-2.29,9.901-13.205,14.128-24.75,14.128h-4.317l5.553-24.208h-19.207l-8.192,35.368h27.396c20.611,0,40.343-11.067,43.604-25.288c3.347-14.225-11.101-25.293-31.89-25.293h-18.143h-22.727C120.923,17.823,118.895,20.346,118.895,20.346L118.895,20.346z"/>
@@ -239,17 +256,110 @@ input:checked + .slider:before {
 </div>
 
 <script>
+let totalBounces = 0;
+const bouncesDisplay = document.getElementById('bounces-count');
+
+// Create audio context and oscillator for achievement sound
+let audioCtx;
+
+function createYippeeSound() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    
+    // Main celebratory tone
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    
+    // Harmonizing tone
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    
+    // Sparkle/achievement effect
+    const osc3 = audioCtx.createOscillator();
+    const gain3 = audioCtx.createGain();
+
+    // Triumph effect
+    const osc4 = audioCtx.createOscillator();
+    const gain4 = audioCtx.createGain();
+
+    // Master volume control
+    const masterGain = audioCtx.createGain();
+    masterGain.gain.setValueAtTime(0.1, audioCtx.currentTime); // Reduced overall volume
+
+    // Main ascending tone (achievement sound)
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(392, audioCtx.currentTime); // G4
+    osc1.frequency.exponentialRampToValueAtTime(784, audioCtx.currentTime + 0.15); // G5
+    
+    // Harmonizing tone
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+    osc2.frequency.exponentialRampToValueAtTime(1174.66, audioCtx.currentTime + 0.2); // D6
+    
+    // Sparkle effect (high frequency chime)
+    osc3.type = 'sine';
+    osc3.frequency.setValueAtTime(1568, audioCtx.currentTime); // G6
+    osc3.frequency.exponentialRampToValueAtTime(2637.02, audioCtx.currentTime + 0.25); // E7
+
+    // Triumph effect (lower supportive tone)
+    osc4.type = 'triangle';
+    osc4.frequency.setValueAtTime(196, audioCtx.currentTime); // G3
+    osc4.frequency.exponentialRampToValueAtTime(392, audioCtx.currentTime + 0.3); // G4
+
+    // Volume envelopes for smooth transitions
+    gain1.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain1.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.05);
+    gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+    
+    gain2.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain2.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+    
+    gain3.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain3.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.15);
+    gain3.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+    gain4.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain4.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+    gain4.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.45);
+
+    // Connect all oscillators through their gains to master volume
+    osc1.connect(gain1);
+    osc2.connect(gain2);
+    osc3.connect(gain3);
+    osc4.connect(gain4);
+    gain1.connect(masterGain);
+    gain2.connect(masterGain);
+    gain3.connect(masterGain);
+    gain4.connect(masterGain);
+    masterGain.connect(audioCtx.destination);
+    
+    // Start and stop oscillators
+    osc1.start(audioCtx.currentTime);
+    osc2.start(audioCtx.currentTime);
+    osc3.start(audioCtx.currentTime);
+    osc4.start(audioCtx.currentTime);
+    osc1.stop(audioCtx.currentTime + 0.5);
+    osc2.stop(audioCtx.currentTime + 0.5);
+    osc3.stop(audioCtx.currentTime + 0.5);
+    osc4.stop(audioCtx.currentTime + 0.5);
+}
+
+function playCornerHitSound() {
+    createYippeeSound();
+}
+
 const logo = document.querySelector('.dvd-logo');
 const cornerToggle = document.getElementById('corner-toggle');
 const bounceCounter = document.getElementById('bounce-counter');
 const bounceCountDisplay = document.getElementById('bounce-count');
 const setBounceBtn = document.getElementById('set-bounces-btn');
 const targetBouncesDisplay = document.getElementById('target-bounces-display');
-const yippySound = document.getElementById('yippy');
 const cornerHitsDisplay = document.getElementById('hits-count');
 let cornerHits = 0;
 
-let isCornerPredictionEnabled = false; // Initialize the variable
+let isCornerPredictionEnabled = false;
 
 let x = Math.random() * (window.innerWidth - 200);
 let y = Math.random() * (window.innerHeight - 100);
@@ -396,6 +506,8 @@ function animate() {
         xDirection *= -1;
         xSpeed = baseXSpeed * xDirection;
         x = nextX >= maxX ? maxX : 0;
+        totalBounces++; // Add bounce counter
+        bouncesDisplay.textContent = totalBounces; // Update display
     } else {
         x = nextX;
     }
@@ -404,6 +516,8 @@ function animate() {
         yDirection *= -1;
         ySpeed = baseYSpeed * yDirection;
         y = nextY >= maxY ? maxY : 0;
+        totalBounces++; // Add bounce counter
+        bouncesDisplay.textContent = totalBounces; // Update display
     } else {
         y = nextY;
     }
@@ -412,8 +526,7 @@ function animate() {
 
     const currentlyInCorner = isCorner(x, y, maxX, maxY);
     if (currentlyInCorner && !lastPositionWasCorner) {
-        yippySound.currentTime = 0;
-        yippySound.play().catch(console.error);
+        playCornerHitSound();
         cornerHits++;
         cornerHitsDisplay.textContent = cornerHits;
     }
@@ -443,6 +556,11 @@ window.addEventListener('resize', () => {
     x = Math.min(x, maxX);
     y = Math.min(y, maxY);
 });
+
+document.addEventListener('click', () => {
+    // Removed YouTube player interaction
+});
+
 </script>
 
 </body></html>
