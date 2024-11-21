@@ -1,0 +1,381 @@
+<html><head><base href=".">
+    <style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .dvd-logo {
+        position: absolute;
+        width: 200px;
+        height: 100px;
+    }
+    
+    #logo {
+        width: 100%;
+        height: 100%;
+        fill: currentColor;
+        animation: color-change 5s infinite;
+    }
+    
+    @keyframes color-change {
+        0% { color: #ff0000; }
+        20% { color: #00ff00; }
+        40% { color: #0000ff; }
+        60% { color: #ffff00; }
+        80% { color: #ff00ff; }
+        100% { color: #ff0000; }
+    }
+    
+    .toggle-container {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        color: white;
+        font-family: Arial, sans-serif;
+    }
+    
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+    
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    #bounce-counter {
+        font-size: 16px;
+        display: none;
+    }
+    
+    .speed-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    #speed-slider {
+        width: 150px;
+    }
+    
+    .speed-label {
+        min-width: 80px;
+        cursor: pointer;
+    }
+    
+    #force-corner-btn {
+        background: #2196F3;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: Arial, sans-serif;
+    }
+    
+    #force-corner-btn:hover {
+        background: #1976D2;
+    }
+    </style>
+    </head>
+    <body>
+    
+    <audio id="yippy" preload="auto">
+        <source src="yippee.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div class="toggle-container">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <label class="switch">
+                <input type="checkbox" id="corner-toggle">
+                <span class="slider"></span>
+            </label>
+            <div id="bounce-counter">Bounces until corner: <span id="bounce-count">calculating...</span></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <label class="switch">
+                <input type="checkbox" id="auto-slowdown">
+                <span class="slider"></span>
+            </label>
+            <span>Auto slowdown when close to corner</span>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">Speed: 1x</span>
+            <input type="range" id="speed-slider" min="1" max="100" value="1">
+        </div>
+        <button id="force-corner-btn">Force One Bounce Before Corner</button>
+    </div>
+    
+    <div class="dvd-logo">
+        <svg id="logo" viewBox="0 0 210 107" xmlns="http://www.w3.org/2000/svg">
+            <path d="M118.895,20.346c0,0-13.743,16.922-13.04,18.001c0.975-1.079-4.934-18.186-4.934-18.186s-1.233-3.597-5.102-15.387H81.81H47.812H22.175l-2.56,11.068h19.299h4.579c12.415,0,19.995,5.132,17.878,14.225c-2.287,9.901-13.123,14.128-24.665,14.128H32.39l5.552-24.208H18.647l-8.192,35.368h27.398c20.612,0,40.166-11.067,43.692-25.288c0.617-2.614,0.53-9.185-1.054-13.053c0-0.093-0.091-0.271-0.178-0.537c-0.087-0.093-0.178-0.722,0.178-0.814c0.172-0.092,0.525,0.271,0.525,0.358c0,0,0.179,0.456,0.351,0.813l17.44,50.315l44.404-51.216l18.143-0.092h4.052c12.416,0,20.09,5.132,17.969,14.225c-2.29,9.901-13.205,14.128-24.75,14.128h-4.317l5.553-24.208h-19.207l-8.192,35.368h27.396c20.611,0,40.343-11.067,43.604-25.288c3.347-14.225-11.101-25.293-31.89-25.293h-18.143h-22.727C120.923,17.823,118.895,20.346,118.895,20.346L118.895,20.346z"/>
+            <path d="M99.424,67.329C47.281,67.329,5,73.449,5,81.012c0,7.558,42.281,13.678,94.424,13.678c52.239,0,94.524-6.12,94.524-13.678C193.949,73.449,151.664,67.329,99.424,67.329z M96.078,85.873c-11.98,0-21.58-2.072-21.58-4.595c0-2.523,9.599-4.59,21.58-4.59c11.888,0,21.498,2.066,21.498,4.59C117.576,83.801,107.966,85.873,96.078,85.873z"/>
+        </svg>
+    </div>
+    
+    <script>
+    const logo = document.querySelector('.dvd-logo');
+    const cornerToggle = document.getElementById('corner-toggle');
+    const bounceCounter = document.getElementById('bounce-counter');
+    const bounceCountDisplay = document.getElementById('bounce-count');
+    const speedSlider = document.getElementById('speed-slider');
+    const speedLabel = document.querySelector('.speed-label');
+    const autoSlowdown = document.getElementById('auto-slowdown');
+    const yippySound = document.getElementById('yippy');
+    const forceCornerBtn = document.getElementById('force-corner-btn');
+    
+    let x = Math.random() * (window.innerWidth - 200);
+    let y = Math.random() * (window.innerHeight - 100);
+    let baseXSpeed = 3;
+    let baseYSpeed = 2;
+    let speedMultiplier = 1;
+    let xDirection = 1;
+    let yDirection = 1;
+    let lastPositionWasCorner = false;
+    
+    let xSpeed = baseXSpeed * xDirection;
+    let ySpeed = baseYSpeed * yDirection;
+    
+    function isCorner(x, y, maxX, maxY) {
+        const CORNER_THRESHOLD = 1;
+        return (
+            (Math.abs(x) <= CORNER_THRESHOLD && Math.abs(y) <= CORNER_THRESHOLD) ||
+            (Math.abs(x - maxX) <= CORNER_THRESHOLD && Math.abs(y) <= CORNER_THRESHOLD) ||
+            (Math.abs(x) <= CORNER_THRESHOLD && Math.abs(y - maxY) <= CORNER_THRESHOLD) ||
+            (Math.abs(x - maxX) <= CORNER_THRESHOLD && Math.abs(y - maxY) <= CORNER_THRESHOLD)
+        );
+    }
+    
+    function setPositionOneBeforeCorner() {
+        const maxX = window.innerWidth - logo.offsetWidth;
+        const maxY = window.innerHeight - logo.offsetHeight;
+        
+        // Randomly choose one of the four corners
+        const corners = [
+            {x: 0, y: 0},           // top-left
+            {x: maxX, y: 0},        // top-right
+            {x: 0, y: maxY},        // bottom-left
+            {x: maxX, y: maxY}      // bottom-right
+        ];
+        
+        const targetCorner = corners[Math.floor(Math.random() * corners.length)];
+        
+        // Calculate current direction to the chosen corner
+        xDirection = Math.sign(targetCorner.x - x);
+        yDirection = Math.sign(targetCorner.y - y);
+        
+        if (xDirection === 0) xDirection = Math.random() < 0.5 ? -1 : 1;
+        if (yDirection === 0) yDirection = Math.random() < 0.5 ? -1 : 1;
+        
+        // Set speed direction
+        xSpeed = baseXSpeed * xDirection;
+        ySpeed = baseYSpeed * yDirection;
+        
+        // Calculate position one bounce before corner
+        const slope = Math.abs(ySpeed / xSpeed);
+        
+        if (targetCorner.x === 0) {
+            x = logo.offsetWidth;
+        } else {
+            x = maxX - logo.offsetWidth;
+        }
+        
+        // Calculate y position based on trajectory to corner
+        if (targetCorner.y === 0) {
+            y = slope * Math.abs(x - targetCorner.x);
+        } else {
+            y = maxY - (slope * Math.abs(x - targetCorner.x));
+        }
+        
+        // Ensure y is within bounds
+        y = Math.max(logo.offsetHeight, Math.min(maxY - logo.offsetHeight, y));
+        
+        // Reset speed multiplier
+        speedMultiplier = 1;
+        speedSlider.value = 1;
+        speedLabel.textContent = 'Speed: 1x';
+    }
+    
+    forceCornerBtn.addEventListener('click', setPositionOneBeforeCorner);
+    
+    let isCornerPredictionEnabled = false;
+    cornerToggle.addEventListener('change', (e) => {
+        isCornerPredictionEnabled = e.target.checked;
+        bounceCounter.style.display = isCornerPredictionEnabled ? 'block' : 'none';
+    });
+    
+    speedSlider.addEventListener('input', (e) => {
+        speedMultiplier = parseInt(e.target.value);
+        speedLabel.textContent = `Speed: ${speedMultiplier}x`;
+    });
+    
+    speedLabel.addEventListener('click', () => {
+        const userSpeed = prompt('Enter desired speed multiplier (any number):');
+        if (userSpeed !== null && !isNaN(userSpeed)) {
+            speedMultiplier = Math.max(1, parseFloat(userSpeed));
+            speedLabel.textContent = `Speed: ${speedMultiplier}x`;
+            if (speedMultiplier <= 100) {
+                speedSlider.value = speedMultiplier;
+            } else {
+                speedSlider.value = 100;
+            }
+        }
+    });
+    
+    function predictBouncesToCorner(x, y, dx, dy, width, height, logoWidth, logoHeight) {
+        const maxX = width - logoWidth;
+        const maxY = height - logoHeight;
+        const CORNER_THRESHOLD = 1;
+        
+        function isCorner(x, y) {
+            return (
+                (Math.abs(x) <= CORNER_THRESHOLD && Math.abs(y) <= CORNER_THRESHOLD) ||
+                (Math.abs(x - maxX) <= CORNER_THRESHOLD && Math.abs(y) <= CORNER_THRESHOLD) ||
+                (Math.abs(x) <= CORNER_THRESHOLD && Math.abs(y - maxY) <= CORNER_THRESHOLD) ||
+                (Math.abs(x - maxX) <= CORNER_THRESHOLD && Math.abs(y - maxY) <= CORNER_THRESHOLD)
+            );
+        }
+    
+        let currentX = x;
+        let currentY = y;
+        let currentDX = dx;
+        let currentDY = dy;
+        let bounces = 0;
+        const MAX_ITERATIONS = 10000;
+    
+        while (bounces < MAX_ITERATIONS) {
+            let timeToXCollision = currentDX > 0 ? 
+                (maxX - currentX) / currentDX : 
+                -currentX / currentDX;
+            let timeToYCollision = currentDY > 0 ? 
+                (maxY - currentY) / currentDY : 
+                -currentY / currentDY;
+    
+            let timeToCollision = Math.min(timeToXCollision, timeToYCollision);
+    
+            currentX += currentDX * timeToCollision;
+            currentY += currentDY * timeToCollision;
+    
+            if (isCorner(currentX, currentY)) {
+                return bounces;
+            }
+    
+            if (Math.abs(timeToXCollision - timeToCollision) < 0.0001) {
+                currentDX = -currentDX;
+            }
+            if (Math.abs(timeToYCollision - timeToCollision) < 0.0001) {
+                currentDY = -currentDY;
+            }
+    
+            bounces++;
+        }
+    
+        return bounces;
+    }
+    
+    function animate() {
+        const maxX = window.innerWidth - logo.offsetWidth;
+        const maxY = window.innerHeight - logo.offsetHeight;
+        
+        x += xSpeed * speedMultiplier;
+        y += ySpeed * speedMultiplier;
+        
+        const currentlyInCorner = isCorner(x, y, maxX, maxY);
+        
+        if (currentlyInCorner && !lastPositionWasCorner) {
+            yippySound.currentTime = 0;
+            yippySound.play();
+        }
+        
+        lastPositionWasCorner = currentlyInCorner;
+        
+        if (x >= maxX || x <= 0) {
+            xDirection *= -1;
+            xSpeed = baseXSpeed * xDirection;
+            x = x >= maxX ? maxX : 0;
+        }
+        if (y >= maxY || y <= 0) {
+            yDirection *= -1;
+            ySpeed = baseYSpeed * yDirection;
+            y = y >= maxY ? maxY : 0;
+        }
+        
+        logo.style.transform = `translate(${x}px, ${y}px)`;
+    
+        if (isCornerPredictionEnabled) {
+            const bouncesLeft = predictBouncesToCorner(
+                x, y, 
+                xSpeed * speedMultiplier, 
+                ySpeed * speedMultiplier,
+                window.innerWidth, 
+                window.innerHeight, 
+                logo.offsetWidth, 
+                logo.offsetHeight
+            );
+            bounceCountDisplay.textContent = bouncesLeft;
+    
+            if (autoSlowdown.checked && typeof bouncesLeft === 'number' && bouncesLeft <= 10 && speedMultiplier !== 1) {
+                speedMultiplier = 1;
+                speedSlider.value = 1;
+                speedLabel.textContent = 'Speed: 1x';
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
+    
+    window.addEventListener('resize', () => {
+        const maxX = window.innerWidth - logo.offsetWidth;
+        const maxY = window.innerHeight - logo.offsetHeight;
+        x = Math.min(x, maxX);
+        y = Math.min(y, maxY);
+    });
+    </script>
+    
+    </body></html>
